@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_name }}</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #172033; }
+    header { padding: 2rem 8%; background: #17365d; color: white; }
+    main { max-width: 850px; margin: 3rem auto; padding: 2rem; background: white;
+           border-radius: 10px; box-shadow: 0 4px 18px rgba(0,0,0,.07); }
+    .tag { display: inline-block; padding: .35rem .7rem; background: #e8f1ff;
+           color: #17365d; border-radius: 20px; font-size: .85rem; }
+    footer { text-align: center; color: #667085; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <header><h1>{{ app_name }}</h1><p>Automated deployment using Ansible and Nginx</p></header>
+  <main>
+    <span class="tag">Deployment successful</span>
+    <h2>Welcome to the student portal</h2>
+    <p>This sample page is delivered from a managed Ubuntu web host.</p>
+    <p><strong>Release:</strong> {{ app_version }}</p>
+    <p><strong>Web service:</strong> Nginx</p>
+  </main>
+  <footer>DevOps case study · Configuration managed as code</footer>
+</body>
+</html>

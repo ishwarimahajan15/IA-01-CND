@@ -1,0 +1,5 @@
+---
+app_name: "MITAOE Student Portal Demo"
+app_version: "1.0.0"
+web_root: "/var/www/student-portal"
+http_port: 80

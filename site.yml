@@ -1,0 +1,97 @@
+---
+- name: Configure and deploy the student portal web tier
+  hosts: web
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - group_vars/web.yml
+
+  tasks:
+    - name: Refresh APT package metadata
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install Nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+
+    - name: Create application document root
+      ansible.builtin.file:
+        path: "{{ web_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Deploy student portal landing page
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: "{{ web_root }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+      notify: Reload Nginx
+
+    - name: Configure Nginx virtual host
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/student-portal
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          server {
+              listen {{ http_port }} default_server;
+              listen [::]:{{ http_port }} default_server;
+              server_name _;
+              root {{ web_root }};
+              index index.html;
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+              add_header X-Content-Type-Options nosniff always;
+              add_header X-Frame-Options SAMEORIGIN always;
+          }
+      notify: Reload Nginx
+
+    - name: Enable student portal site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/student-portal
+        dest: /etc/nginx/sites-enabled/student-portal
+        state: link
+      notify: Reload Nginx
+
+    - name: Remove default Nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload Nginx
+
+    - name: Ensure Nginx is enabled and running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Validate Nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Check the deployed portal over HTTP
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ http_port }}/"
+        status_code: 200
+        return_content: true
+      register: portal_response
+      retries: 5
+      delay: 2
+      until: portal_response.status == 200
+
+  handlers:
+    - name: Reload Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

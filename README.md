@@ -48,3 +48,8 @@ Run the playbook a second time:
 ansible-playbook -i inventory.ini site.yml
 ```
 Expected result: Nginx remains running and already-correct files/configuration are not changed. A second run should report fewer or zero changes (unless package metadata or the environment has changed).
+
+## Important notes
+- Capture your own terminal and browser screenshots after running these commands. Do not submit example output as if it were your machine's execution.
+- If port 80 is already occupied, stop the conflicting service or change `http_port` consistently in `group_vars/web.yml` and use the same port in verification.
+- For a multi-server deployment, replace `localhost` with the managed host's DNS/IP and configure SSH user/key in inventory. Do not store passwords or private keys in this repository.
